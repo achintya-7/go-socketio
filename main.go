@@ -9,7 +9,7 @@ import (
 	"github.com/achintya-7/go_socketio/controllers"
 	"github.com/achintya-7/go_socketio/models"
 	socketio "github.com/googollee/go-socket.io"
-	"github.com/matoous/go-nanoid/v2"
+	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
 func main() {
@@ -31,9 +31,6 @@ func main() {
 	})
 
 	server.OnEvent("/", "send", func(c socketio.Conn, r string) {
-		// TODO : generate a random number or uuid and add it to the req struct
-		// can use the key and value payer as {messageId: "dkbkfnbfbn"}
-
 		var req models.SendMessageReq
 		err := json.Unmarshal([]byte(r), &req)
 		if err != nil {
@@ -52,11 +49,11 @@ func main() {
 		}
 
 		res := models.SendMessageRes{
-			UserId: req.UserId,
-			RoomId: req.RoomId,
-			Content: req.Content,
+			UserId:      req.UserId,
+			RoomId:      req.RoomId,
+			Content:     req.Content,
 			ContentType: req.ContentType,
-			MessageId: uid,
+			MessageId:   uid,
 		}
 
 		server.BroadcastToRoom("/", req.RoomId.String(), "send", res)
