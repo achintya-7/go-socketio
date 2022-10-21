@@ -9,6 +9,7 @@ import (
 	"github.com/achintya-7/go_socketio/controllers"
 	"github.com/achintya-7/go_socketio/models"
 	socketio "github.com/googollee/go-socket.io"
+	"github.com/matoous/go-nanoid/v2"
 )
 
 func main() {
@@ -39,12 +40,23 @@ func main() {
 			fmt.Println("Unable to parse :", err)
 		}
 
+		// generate a uid for the message
+		// ? Could the message ID by a timestamp + sender hash instead?
+		// In any case this should satisfy constraints
+		uid, err := gonanoid.New()
+		if err != nil {
+			fmt.Printf("unable to generate nanoid: %v\n", err)
+			// ? shouldn't proceed if we fail to generate an ID, or is there a failure signal
+			// we can send to let the client know we failed?
+			return
+		}
+
 		res := models.SendMessageRes{
 			UserId: req.UserId,
 			RoomId: req.RoomId,
 			Content: req.Content,
 			ContentType: req.ContentType,
-			MessageId: "323424234",
+			MessageId: uid,
 		}
 
 		server.BroadcastToRoom("/", req.RoomId.String(), "send", res)
