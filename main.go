@@ -6,6 +6,11 @@ import (
 	"log"
 	"net/http"
 
+	// "log"
+	// "net/http"
+	"strings"
+
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/achintya-7/go_socketio/controllers"
 	"github.com/achintya-7/go_socketio/models"
 	socketio "github.com/googollee/go-socket.io"
@@ -19,8 +24,36 @@ func main() {
 	// on connect
 	server.OnConnect("/", func(c socketio.Conn) error {
 		c.SetContext("")
-		fmt.Println("connected", c.ID())
+
+		token := strings.Split(strings.Split(c.URL().RawQuery, "&")[0], "=")[1]
+		if token == "" {
+			return fmt.Errorf("cant get the token")
+		}
+
+		var keyfunc jwt.Keyfunc = func(token *jwt.Token) (interface{}, error) {
+			return []byte("D191359BDAA07A792E10C1916746897FC16729F88D50E5A55D7E11D6C7AE8BE4"), nil
+		}
+
+		parsed, err := jwt.Parse(token, keyfunc)
+		if err != nil {
+			return fmt.Errorf("failed to parse JWT.\nError: %s", err.Error())
+		}
+
+		if !parsed.Valid {
+			return fmt.Errorf("token is not valid")
+		}
+
+		claims, _ := parsed.Claims.(jwt.MapClaims)
+		userId := claims["id"].(string)
+
+		isUser := controllers.GetUser(userId)
+
+		if !isUser {
+			return fmt.Errorf("user not found")
+		}
+
 		return nil
+
 	})
 
 	server.OnEvent("/", "join", func(c socketio.Conn, room string) {
@@ -54,7 +87,7 @@ func main() {
 		}
 
 		server.BroadcastToRoom("/", req.RoomId.Hex(), "send", res)
-		
+
 		controllers.SendMessage(res)
 	})
 
@@ -88,7 +121,6 @@ func main() {
 
 		controllers.ReplyMessage(res)
 
-
 	})
 
 	server.OnError("/", func(c socketio.Conn, e error) {
@@ -103,7 +135,7 @@ func main() {
 	defer server.Close()
 
 	http.Handle("/socket.io/", server)
-	log.Println("Serving on localhost:4000")
-	log.Fatal(http.ListenAndServe("127.0.0.1:4000", nil))
+	log.Println("Serving on localhost:4001")
+	log.Fatal(http.ListenAndServe("127.0.0.1:4001", nil))
 
 }
