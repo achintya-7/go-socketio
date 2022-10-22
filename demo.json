@@ -1,0 +1,40 @@
+[
+    {
+        "function" : "To join room",
+        "event" : "join",
+        "request" : "634aa1a081e27050142653d5"
+    },
+    {
+        "function" : "To send message",
+        "event" : "send",
+        "request" : {
+            "roomId": "ID of room to be sent",
+            "userId": "634a9be1bf4bee51d435b6a8",
+            "content": "Oh my gawd",
+            "content_type": "TEXT"    
+        }
+    }, 
+    {
+        "function" : "To forward message",
+        "event" : "send",
+        "request" : {
+            "roomId": "ID of room to be forwarded to",
+            "userId": "634a9be1bf4bee51d435b6a8",
+            "content": "Oh my gawd",
+            "content_type": "TEXT"    
+        }
+    },
+    {
+        "function" : "To reply message",
+        "event" : "reply",
+        "request" : {
+            "roomId": "ID of room to be sent",
+            "userId": "634a9be1bf4bee51d435b6a8",
+            "content": "Oh my gawd",
+            "content_type": "TEXT"    
+        }
+    },
+    {
+        
+    }
+]

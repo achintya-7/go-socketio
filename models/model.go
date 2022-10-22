@@ -25,6 +25,15 @@ type ReplyMessageReq struct {
 	PrevMessage string             `json:"prev_message"`
 }
 
+type ReplyMessageRes struct {
+	UserId      primitive.ObjectID `json:"userId"`
+	RoomId      primitive.ObjectID `json:"roomId"`
+	Content     string             `json:"content"`
+	ContentType string             `json:"content_type"`
+	PrevMessage string             `json:"prev_message"`
+	MessageId   string             `json:"message_Id"`
+}
+
 type ForwardMessageReq struct {
 	UserId        primitive.ObjectID `json:"userId"`
 	RoomId        primitive.ObjectID `json:"roomId"`
@@ -44,7 +53,7 @@ type DeleteMessageReq struct {
 type SendMessage struct {
 	UserId      primitive.ObjectID `json:"userId"`
 	RoomId      primitive.ObjectID `json:"roomId"`
-	MessageId   primitive.ObjectID `json:"messageId"`
+	MessageId   string `json:"messageId"`
 	Content     string             `json:"content"`
 	ContentType string             `json:"content_type"`
 	PrevMessage string             `json:"prev_message"`

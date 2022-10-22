@@ -21,7 +21,6 @@ func main() {
 		c.SetContext("")
 		fmt.Println("connected", c.ID())
 		return nil
-
 	})
 
 	server.OnEvent("/", "join", func(c socketio.Conn, room string) {
@@ -35,16 +34,14 @@ func main() {
 		err := json.Unmarshal([]byte(r), &req)
 		if err != nil {
 			fmt.Println("Unable to parse :", err)
+			server.BroadcastToRoom("/", req.RoomId.Hex(), "send", err)
+			return
 		}
 
-		// generate a uid for the message
-		// ? Could the message ID by a timestamp + sender hash instead?
-		// In any case this should satisfy constraints
 		uid, err := gonanoid.New()
 		if err != nil {
 			fmt.Printf("unable to generate nanoid: %v\n", err)
-			// ? shouldn't proceed if we fail to generate an ID, or is there a failure signal
-			// we can send to let the client know we failed?
+			server.BroadcastToRoom("/", req.RoomId.Hex(), "send", err)
 			return
 		}
 
@@ -56,8 +53,42 @@ func main() {
 			MessageId:   uid,
 		}
 
-		server.BroadcastToRoom("/", req.RoomId.String(), "send", res)
-		controllers.SendMessage(req)
+		server.BroadcastToRoom("/", req.RoomId.Hex(), "send", res)
+		
+		controllers.SendMessage(res)
+	})
+
+	server.OnEvent("/", "reply", func(c socketio.Conn, r string) {
+		var req models.ReplyMessageReq
+
+		err := json.Unmarshal([]byte(r), &req)
+		if err != nil {
+			fmt.Printf("unable to generate nanoid: %v\n", err)
+			server.BroadcastToRoom("/", req.RoomId.Hex(), "send", err)
+			return
+		}
+
+		uid, err := gonanoid.New()
+		if err != nil {
+			fmt.Printf("unable to generate nanoid: %v\n", err)
+			server.BroadcastToRoom("/", req.RoomId.Hex(), "send", err)
+			return
+		}
+
+		res := models.ReplyMessageRes{
+			UserId:      req.UserId,
+			RoomId:      req.RoomId,
+			Content:     req.Content,
+			ContentType: req.ContentType,
+			PrevMessage: req.PrevMessage,
+			MessageId:   uid,
+		}
+
+		server.BroadcastToRoom("/", req.RoomId.Hex(), "send", res)
+
+		controllers.ReplyMessage(res)
+
+
 	})
 
 	server.OnError("/", func(c socketio.Conn, e error) {

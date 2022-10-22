@@ -45,7 +45,7 @@ func init() {
 	fmt.Println("Name of Db :", database.Name())
 }
 
-func SendMessage(req models.SendMessageReq) {
+func SendMessage(req models.SendMessageRes) {
 
 	timestamp := time.Now().Unix()
 
@@ -56,6 +56,7 @@ func SendMessage(req models.SendMessageReq) {
 		PrevMessage: "",
 		ContentType: req.ContentType,
 		TimeStamp:   timestamp,
+		MessageId: req.MessageId,
 	}
 
 	_, err := database.Collection("messages").InsertOne(context.Background(), data)
@@ -63,8 +64,7 @@ func SendMessage(req models.SendMessageReq) {
 		fmt.Println("Insert Error : ", err)
 	}
 
-	roomId, _ := primitive.ObjectIDFromHex(req.RoomId.String())
-
+	roomId, _ := primitive.ObjectIDFromHex(req.RoomId.Hex())
 	filter := bson.D{{Key: "_id", Value: roomId}}
 	update := bson.D{{Key: "$set", Value: bson.D{{Key: "latestMessage", Value: req.Content}}}}
 
@@ -74,7 +74,7 @@ func SendMessage(req models.SendMessageReq) {
 
 }
 
-func ReplyMessage(req models.ReplyMessageReq) {
+func ReplyMessage(req models.ReplyMessageRes) {
 
 	timestamp := time.Now().Unix()
 
@@ -87,7 +87,7 @@ func ReplyMessage(req models.ReplyMessageReq) {
 		PrevMessage: req.PrevMessage,
 	}
 
-	roomId, _ := primitive.ObjectIDFromHex(req.RoomId.String())
+	roomId, _ := primitive.ObjectIDFromHex(req.RoomId.Hex())
 	filter := bson.D{{Key: "_id", Value: roomId}}
 	update := bson.D{{Key: "$set", Value: bson.D{{Key: "latestMessage", Value: req.Content}}}}
 
