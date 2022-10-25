@@ -5,14 +5,13 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-
-	// "log"
-	// "net/http"
 	"strings"
+	"time"
 
-	"github.com/golang-jwt/jwt/v4"
 	"github.com/achintya-7/go_socketio/controllers"
 	"github.com/achintya-7/go_socketio/models"
+	"github.com/achintya-7/go_socketio/utils"
+	"github.com/golang-jwt/jwt/v4"
 	socketio "github.com/googollee/go-socket.io"
 	gonanoid "github.com/matoous/go-nanoid/v2"
 )
@@ -20,6 +19,7 @@ import (
 func main() {
 
 	server := socketio.NewServer(nil)
+	SECRET_KEY := utils.GetDotEnvVariable("SECRET_TOKEN")
 
 	// on connect
 	server.OnConnect("/", func(c socketio.Conn) error {
@@ -31,7 +31,7 @@ func main() {
 		}
 
 		var keyfunc jwt.Keyfunc = func(token *jwt.Token) (interface{}, error) {
-			return []byte("D191359BDAA07A792E10C1916746897FC16729F88D50E5A55D7E11D6C7AE8BE4"), nil
+			return []byte(SECRET_KEY), nil
 		}
 
 		parsed, err := jwt.Parse(token, keyfunc)
@@ -121,6 +121,39 @@ func main() {
 
 		controllers.ReplyMessage(res)
 
+	})
+
+	server.OnEvent("/", "modify", func(c socketio.Conn, r string) {
+		var req models.DeleteMessageReq
+
+		if err := json.Unmarshal([]byte(r), &req); err != nil {
+			fmt.Println("Unable to unmarshal the json", err)
+			return
+		}
+
+		timestamp := time.Now().UTC().Unix() + 1800
+		
+		if req.TimeStamp <= timestamp {
+			res := models.DeleteMessageRes{
+				RoomId: req.RoomId,
+				MessageId: req.MessageId,
+				TimeStamp: timestamp,
+				DeleteMessage: true,
+			}
+
+			server.BroadcastToRoom("/", req.RoomId.Hex(), "modify", res)
+		
+			controllers.DeleteMessage(req)
+		} else {
+			res := models.DeleteMessageRes{
+				RoomId: req.RoomId,
+				MessageId: req.MessageId,
+				TimeStamp: timestamp,
+				DeleteMessage: false,
+			}
+
+			server.BroadcastToRoom("/", req.RoomId.Hex(), "modify", res)
+		}
 	})
 
 	server.OnError("/", func(c socketio.Conn, e error) {
