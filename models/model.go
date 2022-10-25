@@ -66,7 +66,7 @@ type UpdateMessageRes struct {
 	UpdateMessage bool               `json:"updateMessage"`
 }
 
-type SendMessage struct {
+type SendMessageDB struct {
 	UserId      primitive.ObjectID `json:"userId"`
 	RoomId      primitive.ObjectID `json:"roomId"`
 	MessageId   string             `json:"messageId"`

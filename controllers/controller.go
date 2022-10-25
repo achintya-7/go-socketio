@@ -56,7 +56,7 @@ func SendMessage(req models.SendMessageRes) {
 
 	timestamp := time.Now().UTC().Unix()
 
-	data := models.SendMessage{
+	data := models.SendMessageDB{
 		UserId:      req.UserId,
 		RoomId:      req.RoomId,
 		Content:     req.Content,
@@ -85,13 +85,14 @@ func ReplyMessage(req models.ReplyMessageRes) {
 
 	timestamp := time.Now().UTC().Unix()
 
-	data := models.SendMessage{
+	data := models.SendMessageDB{
 		UserId:      req.UserId,
 		RoomId:      req.RoomId,
 		Content:     req.Content,
 		ContentType: req.ContentType,
 		TimeStamp:   timestamp,
 		PrevMessage: req.PrevMessage,
+		MessageId:   req.MessageId,
 	}
 
 	roomId, _ := primitive.ObjectIDFromHex(req.RoomId.Hex())
@@ -145,6 +146,5 @@ func UpdateMessage(req models.UpdateMessageReq) {
 	}
 
 	fmt.Println(val, err)
-
 
 }
