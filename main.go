@@ -21,7 +21,7 @@ func main() {
 	server := socketio.NewServer(nil)
 	SECRET_KEY := utils.GetDotEnvVariable("SECRET_TOKEN")
 
-	// on connect
+	// on connect with jwt sign in
 	server.OnConnect("/", func(c socketio.Conn) error {
 		c.SetContext("")
 
@@ -56,12 +56,14 @@ func main() {
 
 	})
 
+	// joining of room
 	server.OnEvent("/", "join", func(c socketio.Conn, room string) {
 		c.Context()
 		c.Join(room)
 		c.Emit("join", room)
 	})
 
+	// sending message and forwarding message
 	server.OnEvent("/", "send", func(c socketio.Conn, r string) {
 		var req models.SendMessageReq
 		err := json.Unmarshal([]byte(r), &req)
@@ -91,6 +93,7 @@ func main() {
 		controllers.SendMessage(res)
 	})
 
+	// replying a previous message
 	server.OnEvent("/", "reply", func(c socketio.Conn, r string) {
 		var req models.ReplyMessageReq
 
@@ -109,12 +112,13 @@ func main() {
 		}
 
 		res := models.ReplyMessageRes{
-			UserId:      req.UserId,
-			RoomId:      req.RoomId,
-			Content:     req.Content,
-			ContentType: req.ContentType,
-			PrevMessage: req.PrevMessage,
-			MessageId:   uid,
+			UserId:        req.UserId,
+			RoomId:        req.RoomId,
+			Content:       req.Content,
+			ContentType:   req.ContentType,
+			PrevMessage:   req.PrevMessage,
+			PrevMessageId: req.PrevMessageId,
+			MessageId:     uid,
 		}
 
 		server.BroadcastToRoom("/", req.RoomId.Hex(), "send", res)
@@ -123,7 +127,7 @@ func main() {
 
 	})
 
-	server.OnEvent("/", "modify", func(c socketio.Conn, r string) {
+	server.OnEvent("/", "delete", func(c socketio.Conn, r string) {
 		var req models.DeleteMessageReq
 
 		if err := json.Unmarshal([]byte(r), &req); err != nil {
@@ -132,24 +136,61 @@ func main() {
 		}
 
 		timestamp := time.Now().UTC().Unix() + 1800
-		
+
 		if req.TimeStamp <= timestamp {
 			res := models.DeleteMessageRes{
-				RoomId: req.RoomId,
-				MessageId: req.MessageId,
-				TimeStamp: timestamp,
+				RoomId:        req.RoomId,
+				MessageId:     req.MessageId,
+				TimeStamp:     timestamp,
 				DeleteMessage: true,
 			}
 
 			server.BroadcastToRoom("/", req.RoomId.Hex(), "modify", res)
-		
+
 			controllers.DeleteMessage(req)
 		} else {
 			res := models.DeleteMessageRes{
-				RoomId: req.RoomId,
-				MessageId: req.MessageId,
-				TimeStamp: timestamp,
+				RoomId:        req.RoomId,
+				MessageId:     req.MessageId,
+				TimeStamp:     timestamp,
 				DeleteMessage: false,
+			}
+
+			server.BroadcastToRoom("/", req.RoomId.Hex(), "modify", res)
+		}
+	})
+
+	server.OnEvent("/", "update", func(c socketio.Conn, r string) {
+		var req models.UpdateMessageReq
+
+		if err := json.Unmarshal([]byte(r), &req); err != nil {
+			fmt.Println("Unable to unmarshal the json", err)
+			return
+		}
+
+		timestamp := time.Now().UTC().Unix() + 1800
+
+		if req.TimeStamp <= timestamp {
+			res := models.UpdateMessageRes{
+				RoomId:        req.RoomId,
+				MessageId:     req.MessageId,
+				TimeStamp:     timestamp,
+				Content:       req.Content,
+				ContentType:   req.ContentType,
+				UpdateMessage: true,
+			}
+
+			server.BroadcastToRoom("/", req.RoomId.Hex(), "modify", res)
+
+			controllers.UpdateMessage(req)
+		} else {
+			res := models.UpdateMessageRes{
+				RoomId:        req.RoomId,
+				MessageId:     req.MessageId,
+				TimeStamp:     timestamp,
+				Content:       req.Content,
+				ContentType:   req.ContentType,
+				UpdateMessage: false,
 			}
 
 			server.BroadcastToRoom("/", req.RoomId.Hex(), "modify", res)

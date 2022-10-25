@@ -73,7 +73,7 @@ func SendMessage(req models.SendMessageRes) {
 
 	roomId, _ := primitive.ObjectIDFromHex(req.RoomId.Hex())
 	filter := bson.D{{Key: "_id", Value: roomId}}
-	update := bson.D{{Key: "$set", Value: bson.D{{Key: "latestMessage", Value: req.MessageId}}}}
+	update := bson.D{{Key: "$set", Value: bson.D{{Key: "latestMessageId", Value: req.MessageId}, {Key: "latestMessage", Value: req.Content}}}}
 
 	val, err := database.Collection("chats").UpdateOne(context.Background(), filter, update)
 	fmt.Println(val, err)
@@ -96,7 +96,7 @@ func ReplyMessage(req models.ReplyMessageRes) {
 
 	roomId, _ := primitive.ObjectIDFromHex(req.RoomId.Hex())
 	filter := bson.D{{Key: "_id", Value: roomId}}
-	update := bson.D{{Key: "$set", Value: bson.D{{Key: "latestMessage", Value: req.MessageId}}}}
+	update := bson.D{{Key: "$set", Value: bson.D{{Key: "latestMessageId", Value: req.MessageId}, {Key: "latestMessage", Value: req.Content}}}}
 
 	_, err := database.Collection("messages").InsertOne(context.Background(), data)
 	if err != nil {
@@ -110,6 +110,41 @@ func ReplyMessage(req models.ReplyMessageRes) {
 }
 
 func DeleteMessage(req models.DeleteMessageReq) {
-	
-} 
 
+	filter := bson.D{{Key: "messageId", Value: req.MessageId}}
+	_, err := database.Collection("messages").DeleteOne(context.Background(), filter)
+	if err != nil {
+		fmt.Println("Delete Message Error", err)
+	}
+
+	filter2 := bson.D{{Key: "_id", Value: req.RoomId}, {Key: "latestMessageId", Value: req.MessageId}}
+	update := bson.D{{Key: "latestMessageId", Value: ""}, {Key: "latestMessage", Value: ""}}
+	val, err := database.Collection("chats").UpdateOne(context.Background(), filter2, update)
+	if err != nil {
+		fmt.Println("Update Message Error", err)
+	}
+
+	fmt.Println(val, err)
+
+}
+
+func UpdateMessage(req models.UpdateMessageReq) {
+
+	filter := bson.D{{Key: "messageId", Value: req.MessageId}}
+	update := bson.D{{Key: "content", Value: req.Content}, {Key: "contentType", Value: req.ContentType}}
+	_, err := database.Collection("messages").UpdateOne(context.Background(), filter, update)
+	if err != nil {
+		fmt.Println("Delete Message Error", err)
+	}
+
+	filter2 := bson.D{{Key: "_id", Value: req.RoomId}, {Key: "latestMessageId", Value: req.MessageId}}
+	update2 := bson.D{{Key: "latestMessageId", Value: req.MessageId}, {Key: "latestMessage", Value: req.Content}}
+	val, err := database.Collection("chats").UpdateOne(context.Background(), filter2, update2)
+	if err != nil {
+		fmt.Println("Update Message Error", err)
+	}
+
+	fmt.Println(val, err)
+
+
+}
