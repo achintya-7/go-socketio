@@ -5,13 +5,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/achintya-7/go_socketio/controllers"
 	"github.com/achintya-7/go_socketio/models"
-	"github.com/achintya-7/go_socketio/utils"
-	"github.com/golang-jwt/jwt/v4"
 	socketio "github.com/googollee/go-socket.io"
 	gonanoid "github.com/matoous/go-nanoid/v2"
 )
@@ -19,42 +16,46 @@ import (
 func main() {
 
 	server := socketio.NewServer(nil)
-	SECRET_KEY := utils.GetDotEnvVariable("SECRET_TOKEN")
+	// SECRET_KEY := utils.GetDotEnvVariable("SECRET_TOKEN")
+
+	server.OnConnect("/", func(c socketio.Conn) error {
+		return nil
+	})
 
 	// on connect with jwt sign in
-	server.OnConnect("/", func(c socketio.Conn) error {
-		c.SetContext("")
+	// server.OnConnect("/", func(c socketio.Conn) error {
+	// 	c.SetContext("")
 
-		token := strings.Split(strings.Split(c.URL().RawQuery, "&")[0], "=")[1]
-		if token == "" {
-			return fmt.Errorf("cant get the token")
-		}
+	// 	token := strings.Split(strings.Split(c.URL().RawQuery, "&")[0], "=")[1]
+	// 	if token == "" {
+	// 		return fmt.Errorf("cant get the token")
+	// 	}
 
-		var keyfunc jwt.Keyfunc = func(token *jwt.Token) (interface{}, error) {
-			return []byte(SECRET_KEY), nil
-		}
+	// 	var keyfunc jwt.Keyfunc = func(token *jwt.Token) (interface{}, error) {
+	// 		return []byte(SECRET_KEY), nil
+	// 	}
 
-		parsed, err := jwt.Parse(token, keyfunc)
-		if err != nil {
-			return fmt.Errorf("failed to parse JWT.\nError: %s", err.Error())
-		}
+	// 	parsed, err := jwt.Parse(token, keyfunc)
+	// 	if err != nil {
+	// 		return fmt.Errorf("failed to parse JWT.\nError: %s", err.Error())
+	// 	}
 
-		if !parsed.Valid {
-			return fmt.Errorf("token is not valid")
-		}
+	// 	if !parsed.Valid {
+	// 		return fmt.Errorf("token is not valid")
+	// 	}
 
-		claims, _ := parsed.Claims.(jwt.MapClaims)
-		userId := claims["id"].(string)
+	// 	claims, _ := parsed.Claims.(jwt.MapClaims)
+	// 	userId := claims["id"].(string)
 
-		isUser := controllers.GetUser(userId)
+	// 	isUser := controllers.GetUser(userId)
 
-		if !isUser {
-			return fmt.Errorf("user not found")
-		}
+	// 	if !isUser {
+	// 		return fmt.Errorf("user not found")
+	// 	}
 
-		return nil
+	// 	return nil
 
-	})
+	// })
 
 	// joining of room
 	server.OnEvent("/", "join", func(c socketio.Conn, room string) {
@@ -80,12 +81,15 @@ func main() {
 			return
 		}
 
+		timestamp := time.Now().UTC().Unix()
+
 		res := models.SendMessageRes{
 			UserId:      req.UserId,
 			RoomId:      req.RoomId,
 			Content:     req.Content,
 			ContentType: req.ContentType,
 			MessageId:   uid,
+			Timestamp:   timestamp,
 		}
 
 		server.BroadcastToRoom("/", req.RoomId.Hex(), "send", res)
@@ -111,6 +115,8 @@ func main() {
 			return
 		}
 
+		timestamp := time.Now().UTC().Unix()
+
 		res := models.ReplyMessageRes{
 			UserId:        req.UserId,
 			RoomId:        req.RoomId,
@@ -119,6 +125,7 @@ func main() {
 			PrevMessage:   req.PrevMessage,
 			PrevMessageId: req.PrevMessageId,
 			MessageId:     uid,
+			Timestamp:   timestamp,
 		}
 
 		server.BroadcastToRoom("/", req.RoomId.Hex(), "send", res)
@@ -135,9 +142,9 @@ func main() {
 			return
 		}
 
-		timestamp := time.Now().UTC().Unix() + 1800
+		timestamp := time.Now().UTC().Unix() - 1800
 
-		if req.TimeStamp <= timestamp {
+		if timestamp <= req.TimeStamp {
 			res := models.DeleteMessageRes{
 				RoomId:        req.RoomId,
 				MessageId:     req.MessageId,
@@ -168,9 +175,8 @@ func main() {
 			return
 		}
 
-		timestamp := time.Now().UTC().Unix() + 1800
-
-		if req.TimeStamp <= timestamp {
+		timestamp := time.Now().UTC().Unix() - 1800
+		if timestamp <= req.TimeStamp {
 			res := models.UpdateMessageRes{
 				RoomId:        req.RoomId,
 				MessageId:     req.MessageId,

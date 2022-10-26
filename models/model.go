@@ -15,6 +15,7 @@ type SendMessageRes struct {
 	Content     string             `json:"content"`
 	ContentType string             `json:"contentType"`
 	MessageId   string             `json:"messageId"`
+	Timestamp   int64              `json:"timestamp"`
 }
 
 type ReplyMessageReq struct {
@@ -34,24 +35,25 @@ type ReplyMessageRes struct {
 	PrevMessage   string             `json:"prevMessage"`
 	MessageId     string             `json:"messageId"`
 	PrevMessageId string             `json:"prevMessageId"`
+	Timestamp     int64              `json:"timestamp"`
 }
 
 type DeleteMessageReq struct {
 	RoomId    primitive.ObjectID `json:"roomId"`
-	MessageId primitive.ObjectID `json:"messageId"`
+	MessageId string             `json:"messageId"`
 	TimeStamp int64              `json:"timestamp"`
 }
 
 type DeleteMessageRes struct {
 	RoomId        primitive.ObjectID `json:"roomId"`
-	MessageId     primitive.ObjectID `json:"messageId"`
+	MessageId     string             `json:"messageId"`
 	TimeStamp     int64              `json:"timestamp"`
 	DeleteMessage bool               `json:"deleteMessage"`
 }
 
 type UpdateMessageReq struct {
 	RoomId      primitive.ObjectID `json:"roomId"`
-	MessageId   primitive.ObjectID `json:"messageId"`
+	MessageId   string             `json:"messageId"`
 	TimeStamp   int64              `json:"timestamp"`
 	Content     string             `json:"content"`
 	ContentType string             `json:"contentType"`
@@ -59,7 +61,7 @@ type UpdateMessageReq struct {
 
 type UpdateMessageRes struct {
 	RoomId        primitive.ObjectID `json:"roomId"`
-	MessageId     primitive.ObjectID `json:"messageId"`
+	MessageId     string             `json:"messageId"`
 	TimeStamp     int64              `json:"timestamp"`
 	Content       string             `json:"content"`
 	ContentType   string             `json:"contentType"`

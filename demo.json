@@ -33,7 +33,7 @@
             "content": "How are you",
             "contentType": "TEXT",
             "prevMessage": "I am fine",
-            "prevMessageId": "87358945792"    
+            "prevMessageId": "Blolj2IYJULK88LL-2AEl"    
         }
     },
     {
@@ -41,8 +41,8 @@
         "event" : "delete",
         "request" : {
             "roomId": "ID of room to be sent",
-            "userId": "634a9be1bf4bee51d435b6a8",
-            "timestamp": "timestamp of the message created"  
+            "messageId": "Blolj2IYJULK88LL-2AEl",
+            "timestamp": 543534535 
         }
     },
     {
@@ -50,8 +50,8 @@
         "event" : "update",
         "request" : {
             "roomId": "ID of room to be sent",
-            "userId": "634a9be1bf4bee51d435b6a8",
-            "timestamp": "timestamp of the message created",
+            "messageId": "Blolj2IYJULK88LL-2AEl",
+            "timestamp": 34543353535,
             "content": "How are you",
             "contentType": "TEXT"  
         }
