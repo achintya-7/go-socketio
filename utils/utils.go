@@ -10,7 +10,7 @@ import (
 func GetDotEnvVariable(key string) string {
 	err := godotenv.Load(".env")
 	if err != nil {
-		log.Fatal("Error oading .env file")
+		log.Fatal("Error Loading .env file")
 	}
 
 	return os.Getenv(key)
