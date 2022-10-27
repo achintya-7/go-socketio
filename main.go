@@ -216,6 +216,7 @@ func main() {
 
 	http.Handle("/socket.io/", server)
 	log.Println("Serving on localhost:4001")
-	log.Fatal(http.ListenAndServe("127.0.0.1:4001", nil))
-
+	log.Fatal(http.ListenAndServe("127.0.0.1:4001", nil)) // windows
+	// log.Fatal(http.ListenAndServe(":4001", nil)) // linux
+	
 }
