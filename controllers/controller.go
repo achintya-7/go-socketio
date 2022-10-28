@@ -6,15 +6,17 @@ import (
 	"log"
 
 	"github.com/achintya-7/go_socketio/models"
-	"github.com/achintya-7/go_socketio/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var MONGO_URI = utils.GetDotEnvVariable("MONGO_URI")
-var DB_NAME = utils.GetDotEnvVariable("DB_NAME")
+// var MONGO_URI = utils.GetDotEnvVariable("MONGO_URI")
+// var DB_NAME = utils.GetDotEnvVariable("DB_NAME")
+
+var MONGO_URI string = "mongodb+srv://Achintya:X7hunter@cluster0.wuvef.mongodb.net/test"
+var DB_NAME string = "test"
 
 var database *mongo.Database
 

@@ -2,11 +2,13 @@
     {
         "function" : "To join room",
         "event" : "join",
+        "client-event": "join",
         "request" : "634aa1a081e27050142653d5"
     },
     {
         "function" : "To send message",
         "event" : "send",
+        "client-event": "send",
         "request" : {
             "roomId": "ID of room to be sent",
             "userId": "634a9be1bf4bee51d435b6a8",
@@ -17,6 +19,7 @@
     {
         "function" : "To forward message",
         "event" : "send",
+        "client-event": "send",
         "request" : {
             "roomId": "ID of room to be forwarded to",
             "userId": "634a9be1bf4bee51d435b6a8",
@@ -27,6 +30,7 @@
     {
         "function" : "To reply message",
         "event" : "reply",
+        "client-event": "send",
         "request" : {
             "roomId": "ID of room to be sent",
             "userId": "634a9be1bf4bee51d435b6a8",
@@ -39,6 +43,7 @@
     {
         "function" : "To delete a message",
         "event" : "delete",
+        "client-event": "modify",
         "request" : {
             "roomId": "ID of room to be sent",
             "messageId": "Blolj2IYJULK88LL-2AEl",
@@ -48,6 +53,7 @@
     {
         "function" : "To update a message",
         "event" : "update",
+        "client-event": "modify",
         "request" : {
             "roomId": "ID of room to be sent",
             "messageId": "Blolj2IYJULK88LL-2AEl",
